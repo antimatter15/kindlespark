@@ -1,0 +1,173 @@
+<style>
+input[type=text] {
+  border: none;
+  padding: 2px;
+  width: 400px;
+}
+input {
+  font-size: xx-large;
+}
+input[type=submit] {
+  -webkit-transition: opacity .25s linear;
+}
+#form {
+  -webkit-transition: opacity .25s linear;
+}
+#prog {
+  -webkit-transition: opacity .25s linear;
+  width: 400px;
+  height: 40px;
+  position: absolute;
+  z-index: -2;
+  top: 10px;
+}
+body {
+  background-color: #D8E2E3;
+  -webkit-transition: background-color .25s linear;
+  font-family: sans-serif;
+  font-size: x-large;
+}
+</style>
+<title>KindleSpark</title>
+<form onsubmit="smartload();return false;" id="form">
+  <input id="book" type="text" placeholder="sparknotes" oninput="document.getElementById('button').style.opacity=this.value?1:0">
+  <input type="submit" value="Go" id="button" style="opacity:0">
+</form>
+
+<progress id="prog" value=0 style="opacity:0"></progress>
+
+
+<label for="kindle">Kindle</label> <input type="checkbox" checked id="kindle">
+
+<iframe id="frame" style="display:none"></iframe>
+
+<script>
+var list = 'To Kill a Mockingbird,1984,2001,The Aeneid,Alice in Wonderland,Animal Farm,Atlas Shrugged,The Great Gatsby,Lord of the Flies,Frankenstein,Catcher in the Rye,The Odyssey,Of Mice and Men'.split(','), n = 0;
+setInterval(function(){
+  if(document.getElementById('book'))
+    document.getElementById('book').placeholder = list[n++ % list.length];
+}, 3141);
+
+var links = [], linknum = 0;
+var html = '';
+var book = '';
+
+var tmpl = 'select * from html where url="$$" and xpath=\'//div[@class="mainContent"]\''
+
+function loadpage(u, cb){
+  var query = (tmpl.replace('$$', u));
+  runquery(query, cb);
+}
+
+function runquery(query, cb){
+  var callback = "_kx"+Math.random().toString(36).slice(3);
+  window[callback] = function(e){
+    cb(e.results.length && e.results[0]);
+    document.body.removeChild(s);
+  }
+  var url = "http://query.yahooapis.com/v1/public/yql?"+
+    "q="+encodeURIComponent(query)+"&format=xml&callback="+callback;
+  var s = document.createElement('script');
+  s.src = url;
+  document.body.appendChild(s);
+}
+
+function runsearch(q){
+  runquery('select * from html where url="http://www.sparknotes.com/autocomplete/autocomplete_query.php?q='+encodeURIComponent(q)+'"', function(e){
+    var text = e || '';
+    var dom = getdom(text);
+    var t = (dom.documentElement.innerText ||dom.documentElement.contentText) + ' ';
+    var m = (t.match(/sparknotes.com([^ ]+)/));
+    if(m){
+      document.getElementById('book').value = m[1];
+      setTimeout(function(){load(m[1])}, 1000);
+    }else{
+      load('/lit/'+ q.toLowerCase().replace(/ /g, '-'));
+    }
+  })
+}
+
+function smartload(){
+  document.body.style.backgroundColor = '#DFD8E3';
+  var book = document.getElementById('book').value.trim();
+  if(book[0] == '/') load(book);
+  else runsearch(book);
+}
+
+function load(path){
+  document.getElementById('form').style.opacity = '0';
+  loadpage('http://www.sparknotes.com'+path, function(e){
+    if(e == 0){
+      document.body.style.backgroundColor = '#FAE4BE';
+    }else{
+      document.body.style.backgroundColor = '#D8E3D8';
+      var d = getdom(e);
+      var h = d.querySelectorAll('.alphaBox a');
+      for(var i = 0; i < h.length; i++){
+        if(h[i].href && !/citing|bibliography|quiz/.test(h[i].href)){
+          links.push(h[i].href);
+        }
+      }
+      linknum = links.length;
+      setTimeout(function(){
+        document.getElementById('prog').style.opacity = 1;
+        queued();
+      }, 200);
+    }
+  })
+}
+
+function done(){
+  var setting = document.getElementById('kindle').checked;
+  document.title = booktitle;
+  document.open();
+  document.write('<head><title>'+booktitle.trim()+'</title></head>');
+  document.write('<body><h1>'+booktitle.trim()+'</h1>\n\n'+html+'</body>');
+  document.close();
+  document.title = booktitle.trim();
+  history.pushState({}, "", "?"+booktitle.replace(/[^a-z0-9]/ig,'')+"-"+(new Date).getHours()+':'+(new Date).getMinutes());
+  if(setting){
+    setTimeout(function(){
+      (function(){window.baseUrl='http://www.readability.com';window.readabilityToken='';var s=document.createElement('script');s.setAttribute('type','text/javascript');s.setAttribute('charset','UTF-8');s.setAttribute('src',baseUrl+'/bookmarklet/send-to-kindle.js');document.documentElement.appendChild(s);})()
+    }, 1000);
+  }
+}
+var booktitle = '';
+var bookauthor = '';
+function queued(){
+  var link = links.shift();
+  if(!link) return done();
+  loadpage(link, function(e){
+    document.getElementById('prog').value = 1 - links.length/linknum;
+    var d = getdom(e);
+    var z;
+    while(z = d.querySelector('.floatingad')){
+      z.parentNode.removeChild(z);
+    }
+    while(z = d.querySelector('.explanationblurb')){
+      z.parentNode.removeChild(z);
+    }
+    for(var k = d.querySelectorAll('.explanationtext'), i = 0; i < k.length; i++){
+      k[i].style.display = '';
+      try {
+        var link = k[i].querySelector('a');
+        link.parentNode.removeChild(link);
+      }catch(err){
+        console.log(k[i].innerHTML);
+      }
+    }
+    
+    html += d.querySelector('.studyGuideText').innerHTML + '\n\n';
+    booktitle = d.querySelector('.titleLeft').innerText;
+    bookauthor = d.querySelector('.authorRight').innerText;
+    setTimeout(queued, 100);
+  });
+}
+
+function getdom(string){
+  var iframe = document.getElementById('frame');
+  iframe.contentDocument.documentElement.innerHTML = string;
+  return iframe.contentDocument
+}
+
+</script>
