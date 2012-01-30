@@ -30,7 +30,7 @@ body {
 </style>
 <title>KindleSpark</title>
 <form onsubmit="smartload();return false;" id="form">
-  <input id="book" type="text" placeholder="sparknotes" oninput="document.getElementById('button').style.opacity=this.value?1:0">
+  <input id="book" type="text" placeholder="1984" oninput="document.getElementById('button').style.opacity=this.value?1:0">
   <input type="submit" value="Go" id="button" style="opacity:0">
 </form>
 
@@ -42,7 +42,7 @@ body {
 <iframe id="frame" style="display:none"></iframe>
 
 <script>
-var list = 'To Kill a Mockingbird,1984,2001,The Aeneid,Alice in Wonderland,Animal Farm,Atlas Shrugged,The Great Gatsby,Lord of the Flies,Frankenstein,Catcher in the Rye,The Odyssey,Of Mice and Men'.split(','), n = 0;
+var list = 'To Kill a Mockingbird,2001,The Aeneid,Alice in Wonderland,Animal Farm,Atlas Shrugged,The Great Gatsby,Lord of the Flies,Frankenstein,Catcher in the Rye,The Odyssey,Of Mice and Men'.split(','), n = 0;
 setInterval(function(){
   if(document.getElementById('book'))
     document.getElementById('book').placeholder = list[n++ % list.length];
@@ -153,7 +153,6 @@ function queued(){
         var link = k[i].querySelector('a');
         link.parentNode.removeChild(link);
       }catch(err){
-        console.log(k[i].innerHTML);
       }
     }
     
