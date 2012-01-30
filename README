@@ -6,4 +6,6 @@ I decided to do it again, but this time, I needed to do it right. I needed to ma
 
 So the first idea was just big user interface elements with nice animations. For example, the main user interface element is a text box. A "Go" button fades in if and only if the text box isn't empty, and while it is empty, the text area flips through examples of stuff you can time into it.
 
-The state is communicated by color, light, undersaturated colors that smoothly transition over a quarter second duration. 
+The state is communicated by color, light, undersaturated colors that smoothly transition over a quarter second duration. Then everything is replaced by a nice, huge progress bar which slides across the screen  and once it's done, the page gets replaced with text, and it automatically sends it to my kindle.
+
+And now it's on github, for nobody to use.
