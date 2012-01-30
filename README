@@ -1,0 +1,9 @@
+I started this on January 26, 2012. A Thursday, mind you. It was, quite simply something I made out of personal necessity.
+
+I had prototyped an earlier version of this application but then, regrettably, when the time came that Thursday night when it could be put to use, I failed to locate it. (The last one was written as a series of things meant to be pasted into the chrome web inspector followed by a few bookmarklets)
+
+I decided to do it again, but this time, I needed to do it right. I needed to make an app that quite probably would never get published that was designed well. I needed it to embody the ideas I had of utility development, with the right mix of modernity and minimalism.
+
+So the first idea was just big user interface elements with nice animations. For example, the main user interface element is a text box. A "Go" button fades in if and only if the text box isn't empty, and while it is empty, the text area flips through examples of stuff you can time into it.
+
+The state is communicated by color, light, undersaturated colors that smoothly transition over a quarter second duration. 
