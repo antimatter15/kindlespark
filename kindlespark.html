@@ -55,6 +55,7 @@ var book = '';
 var tmpl = 'select * from html where url="$$" and xpath=\'//div[@class="mainContent"]\''
 
 function loadpage(u, cb){
+  console.log('load', u);
   var query = (tmpl.replace('$$', u));
   runquery(query, cb);
 }
@@ -73,6 +74,7 @@ function runquery(query, cb){
 }
 
 function runsearch(q){
+  console.log('search', q)
   runquery('select * from html where url="http://www.sparknotes.com/autocomplete/autocomplete_query.php?q='+encodeURIComponent(q)+'"', function(e){
     var text = e || '';
     var dom = getdom(text);
@@ -86,17 +88,18 @@ function runsearch(q){
     }
   })
 }
-
 function smartload(){
   document.body.style.backgroundColor = '#DFD8E3';
   var book = document.getElementById('book').value.trim();
   if(book[0] == '/') load(book);
   else runsearch(book);
 }
+superpath = '';
 
 function load(path){
   document.getElementById('form').style.opacity = '0';
-  loadpage('http://www.sparknotes.com'+path, function(e){
+  superpath = 'http://www.sparknotes.com'+path
+  loadpage(superpath, function(e){
     if(e == 0){
       document.body.style.backgroundColor = '#FAE4BE';
     }else{
@@ -165,7 +168,7 @@ function queued(){
 
 function getdom(string){
   var iframe = document.getElementById('frame');
-  iframe.contentDocument.documentElement.innerHTML = string;
+  iframe.contentDocument.documentElement.innerHTML = '<base href="'+superpath+'">'+string;
   return iframe.contentDocument
 }
 
